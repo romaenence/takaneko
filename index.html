@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高嶺のなでしこ 好き曲ソート</title>
+<style>
+  :root{
+    --primary:#ff6b8b; --bg:#fff5f7; --card:#fff; --text:#4a4a4a; --sub:#888; --border:#ffe1e8;
+  }
+  *{box-sizing:border-box}
+  body{font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+    background:var(--bg);color:var(--text);margin:0;padding:20px 12px;display:flex;justify-content:center;min-height:100vh}
+  .container{max-width:600px;width:100%;background:var(--card);padding:24px 16px;border-radius:20px;
+    box-shadow:0 10px 25px rgba(255,107,139,.12);text-align:center;align-self:flex-start}
+  h1{font-size:1.4rem;color:var(--primary);margin:0 0 6px;letter-spacing:.05em}
+  h2{font-size:1.05rem;margin:0 0 6px}
+  p.desc{font-size:.85rem;color:var(--sub);margin:0 0 20px}
+  [hidden]{display:none!important}
+  button{font:inherit;cursor:pointer}
+  button:focus-visible{outline:3px solid #ffb3c4;outline-offset:2px}
+
+  .progress-bar{width:100%;background:#f0f0f0;border-radius:10px;height:10px;overflow:hidden;margin-bottom:6px}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#ff9a9e,#ff6b8b);width:0;transition:width .3s;border-radius:10px}
+  #status{font-size:.8rem;color:var(--sub);font-weight:500;margin-bottom:16px}
+  .league{display:inline-block;background:#fff0f3;color:var(--primary);border:1px solid var(--border);
+    padding:4px 12px;border-radius:999px;font-size:.8rem;font-weight:bold;margin-bottom:10px}
+
+  .choice-container{display:flex;gap:12px;margin-bottom:16px}
+  .choice-card{flex:1;background:#fff;border:2px solid var(--border);border-radius:14px;padding:10px;
+    display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 10px rgba(0,0,0,.03);overflow:hidden;
+    transition:all .2s;color:inherit}
+  .choice-card:active{transform:scale(.98)}
+  @media (hover:hover){
+    .choice-card:hover{border-color:var(--primary);background:#fff9fa;transform:translateY(-3px);box-shadow:0 8px 18px rgba(255,107,139,.2)}
+  }
+  .choice-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:10px;background:#eee}
+  .choice-title{font-size:.95rem;font-weight:bold;line-height:1.3;word-break:break-word}
+
+  .control-btns{display:flex;gap:8px;flex-wrap:wrap}
+  .sub-btn{flex:1;padding:10px 12px;font-size:.82rem;background:#f7f7f7;border:1px solid #eaeaea;border-radius:10px;color:#666;font-weight:500;transition:all .2s}
+  .sub-btn:hover{background:#eee;color:#333}
+  .sub-btn:disabled{opacity:.4;cursor:not-allowed}
+  .main-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:0;border-radius:12px;font-weight:bold;font-size:.95rem}
+  .main-btn:disabled{opacity:.4;cursor:not-allowed}
+  .keys{color:var(--sub);font-size:.75rem;margin-top:12px}
+
+  /* 対象曲の選択 */
+  .setup-bar{display:flex;gap:8px;margin:10px 0}
+  .song-list{max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:12px;text-align:left}
+  .song-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+  .song-row:last-child{border-bottom:0}
+  .song-row .box{width:20px;height:20px;border:2px solid #ddd;border-radius:6px;flex:none}
+  .song-row[aria-checked="true"]{background:#fff5f7}
+  .song-row[aria-checked="true"] .box{background:var(--primary);border-color:var(--primary)}
+  .song-row img{width:64px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#eee;flex:none}
+  .song-row span.t{font-size:.9rem;font-weight:bold;line-height:1.3}
+  #selCount{font-size:.85rem;color:var(--sub);margin:8px 0}
+  #resumeBox{background:#fff5f7;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px}
+
+  /* 結果 */
+  #result-area{text-align:left}
+  #result-area h2{text-align:center;font-size:1.3rem;color:var(--primary);margin-bottom:16px}
+  .rank-table{width:100%;border-collapse:separate;border-spacing:0 8px}
+  .rank-table td{padding:10px 8px;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);vertical-align:middle}
+  .rank-table td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px;font-weight:bold;width:70px;text-align:center}
+  .rank-table td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
+  .rank-badge{display:inline-block;padding:3px 6px;border-radius:6px;font-size:.8rem}
+  .rank-1 .rank-badge{background:#ffeaa7;color:#d63031}
+  .rank-2 .rank-badge{background:#dfe6e9;color:#2d3436}
+  .rank-3 .rank-badge{background:#fab1a0;color:#e17055}
+  .result-item{display:flex;align-items:center;gap:12px}
+  .result-thumb{width:70px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;flex-shrink:0;background:#eee}
+  .result-title{font-size:.9rem;font-weight:bold}
+  .share-area{margin-top:24px;text-align:center}
+  .share-btn{display:block;width:100%;padding:12px 20px;background:#000;color:#fff;text-decoration:none;border-radius:12px;font-weight:bold;font-size:.9rem;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+  .share-btn:hover{opacity:.85}
+  .share-area .sub-btn{margin-top:12px;width:100%}
+  .site-footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);text-align:left;
+    font-size:.75rem;line-height:1.7;color:var(--sub)}
+  .site-footer p{margin:0 0 6px;padding-left:1em;text-indent:-1em}
+  @media (max-width:420px){ .choice-container{gap:8px} .choice-title{font-size:.85rem} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>高嶺のなでしこ 好き曲ソート</h1>
+
+  <!-- 1. 対象曲の選択 -->
+  <div id="setup-area" hidden>
+    <p class="desc">対象にする曲を選んでください。知らない曲は外すと精度が上がります。</p>
+    <div id="resumeBox" hidden>
+      <h2>前回のソートが途中です</h2>
+      <div class="control-btns">
+        <button class="sub-btn" id="resumeBtn">続きから再開する</button>
+        <button class="sub-btn" id="discardBtn">破棄して最初から</button>
+      </div>
+    </div>
+    <div class="setup-bar">
+      <button class="sub-btn" id="selAll">全部選ぶ</button>
+      <button class="sub-btn" id="selNone">全部外す</button>
+    </div>
+    <div class="song-list" id="songList" role="listbox" aria-multiselectable="true"></div>
+    <div id="selCount"></div>
+    <button class="main-btn" id="startBtn">ソート開始</button>
+  </div>
+
+  <!-- 2. バトル -->
+  <div id="sort-area" hidden>
+    <p class="desc">直感的に「好き・良い」と思う曲を選んでね</p>
+    <div id="leagueTag" class="league" hidden>$D83C$DFC6 決勝リーグ：上位の並びを最終チェック</div>
+    <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+    <div id="status">データを読み込み中...</div>
+    <div class="choice-container">
+      <button class="choice-card" id="btnL">
+        <img id="left-img" class="choice-img" alt="">
+        <div id="left-title" class="choice-title"></div>
+      </button>
+      <button class="choice-card" id="btnR">
+        <img id="right-img" class="choice-img" alt="">
+        <div id="right-title" class="choice-title"></div>
+      </button>
+    </div>
+    <div class="control-btns">
+      <button class="sub-btn" id="btnTie">引き分け / 両方好き</button>
+      <button class="sub-btn" id="btnUndo">1つやり直す</button>
+    </div>
+    <div class="control-btns" style="margin-top:8px">
+      <button class="sub-btn" id="btnSkip" hidden>決勝リーグを省略して結果を見る</button>
+      <button class="sub-btn" id="btnHome">ホームに戻る</button>
+    </div>
+    <p class="keys">キーボード: ← 左 / → 右 / ↓ 引き分け / Z やり直し</p>
+  </div>
+
+  <!-- 3. 結果 -->
+  <div id="result-area" hidden>
+    <h2>$D83C$DF89 ランキング結果</h2>
+    <table class="rank-table"><tbody id="result-list"></tbody></table>
+    <div class="share-area">
+      <a id="x-share" class="share-btn" target="_blank" rel="noopener">X（旧Twitter）で結果を共有</a>
+      <button class="sub-btn" id="againBtn">もう一度やり直す</button>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>※ 「高嶺のなでしこ」の公式ページではありません。ご利用は自己責任でお願いいたします。</p>
+    <p>※ 対象楽曲は<a href="https://www.youtube.com/channel/UCoR4zZDvWvUIqgEWz4HS-sA" target="_blank">公式YouTube</a>に掲載されている「MV」より、曲名、サムネイル画像を引用させていただいています。</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = s => document.querySelector(s);
+  const KEY = 'takaneko-sort-v2';
+  const LEAGUE_SIZE = 10;     // 決勝リーグの対象(上位何曲を見直すか)
+  const LEAGUE_MAX_PASS = 3;  // 見直しの最大周回数
+
+  let items = [], itemById = new Map();
+  let selected = new Set();
+  let session = null;   // { order:[id], choices:['l'|'r'|'t'|'s'] }
+  let sorter = null;
+
+  /* ================= 並べ替えエンジン =================
+     状態は「最初の並び + これまでの選択履歴」だけで毎回再現(replay)する。
+     → 途中保存・再開・やり直しが同じ仕組みで安全に動く。
+     phase: merge(マージソート) → verify(決勝リーグ) → done */
+  function makeSorter(order) {
+    return { phase: 'merge', lists: order.map(id => [id]), cur: null, ties: new Set(),
+             done: 0, n: order.length, v: null, result: null, pair: null };
+  }
+  function mergeNext(s) {
+    for (;;) {
+      if (!s.cur) {
+        if (s.lists.length <= 1) return null;
+        s.cur = { a: s.lists.shift(), b: s.lists.shift(), i: 0, j: 0, out: [] };
+      }
+      const c = s.cur;
+      if (c.i >= c.a.length || c.j >= c.b.length) {
+        s.lists.push(c.out.concat(c.a.slice(c.i), c.b.slice(c.j)));
+        s.cur = null; continue;
+      }
+      return [c.a[c.i], c.b[c.j]];
+    }
+  }
+  function next(s) {
+    if (s.phase === 'merge') {
+      const p = mergeNext(s);
+      if (p) { s.pair = p; return; }
+      const list = s.lists[0] || [];
+      if (list.length >= 3) {
+        s.phase = 'verify';
+        s.v = { list: list.slice(), i: 0, swapped: false, pass: 1, k: Math.min(LEAGUE_SIZE, list.length) };
+      } else { s.phase = 'done'; s.result = list; s.pair = null; return; }
+    }
+    if (s.phase === 'verify') {
+      s.pair = [s.v.list[s.v.i], s.v.list[s.v.i + 1]];
+    }
+  }
+  function apply(s, ch) {
+    if (s.phase === 'merge') {
+      const c = s.cur;
+      if (ch === 'l') c.out.push(c.a[c.i++]);
+      else if (ch === 'r') c.out.push(c.b[c.j++]);
+      else if (ch === 't') { s.ties.add(c.a[c.i] + '|' + c.b[c.j]); c.out.push(c.a[c.i++], c.b[c.j++]); }
+      s.done++;
+    } else if (s.phase === 'verify') {
+      const v = s.v;
+      if (ch === 's') { s.phase = 'done'; s.result = v.list; s.pair = null; return; }
+      if (ch === 'r') { [v.list[v.i], v.list[v.i + 1]] = [v.list[v.i + 1], v.list[v.i]]; v.swapped = true; }
+      else if (ch === 't') s.ties.add(v.list[v.i] + '|' + v.list[v.i + 1]);
+      v.i++;
+      if (v.i >= v.k - 1) {
+        if (v.swapped && v.pass < LEAGUE_MAX_PASS) { v.pass++; v.i = 0; v.swapped = false; }
+        else { s.phase = 'done'; s.result = v.list; s.pair = null; }
+      }
+    }
+  }
+  function replay(order, choices) {
+    const s = makeSorter(order);
+    next(s);
+    for (const ch of choices) {
+      if (s.phase === 'done' || !s.pair) break;
+      apply(s, ch);
+      if (s.phase !== 'done') next(s);
+    }
+    return s;
+  }
+  const estimate = n => Math.max(1, Math.round(n * Math.log2(n) - n + 1));
+
+  /* ================= 保存 ================= */
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(session)); } catch (e) {} };
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; } };
+  const clear = () => { try { localStorage.removeItem(KEY); } catch (e) {} };
+
+  /* ================= 画面 ================= */
+  const show = id => ['setup-area', 'sort-area', 'result-area'].forEach(x => $('#' + x).hidden = (x !== id));
+  function setImg(img, url) {
+    img.onerror = () => {
+      img.onerror = null;
+      if (url.includes('maxresdefault')) img.src = url.replace('maxresdefault', 'hqdefault');
+    };
+    img.src = url;
+  }
+
+  function renderSetup() {
+    const saved = load();
+    $('#resumeBox').hidden = !(saved && Array.isArray(saved.order) && saved.order.every(id => itemById.has(id)));
+    $('#songList').replaceChildren(...items.map(it => {
+      const row = document.createElement('div');
+      row.className = 'song-row'; row.setAttribute('role', 'option'); row.tabIndex = 0;
+      row.setAttribute('aria-checked', selected.has(it.id));
+      const box = document.createElement('span'); box.className = 'box';
+      const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy'; setImg(img, it.image);
+      const t = document.createElement('span'); t.className = 't'; t.textContent = it.title;
+      row.append(box, img, t);
+      const flip = () => { selected.has(it.id) ? selected.delete(it.id) : selected.add(it.id); renderSetup(); };
+      row.onclick = flip;
+      row.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
+      return row;
+    }));
+    $('#selCount').textContent = `選択中 ${selected.size}曲（${selected.size >= 2 ? `バトルは約${estimate(selected.size)}回＋決勝リーグ` : '2曲以上選んでください'}）`;
+    $('#startBtn').disabled = selected.size < 2;
+    show('setup-area');
+  }
+
+  function renderBattle() {
+    if (sorter.phase === 'done') return renderResult();
+    show('sort-area');
+    const [l, r] = sorter.pair.map(id => itemById.get(id));
+    $('#left-title').textContent = l.title;  setImg($('#left-img'), l.image);
+    $('#right-title').textContent = r.title; setImg($('#right-img'), r.image);
+    const verifying = sorter.phase === 'verify';
+    $('#leagueTag').hidden = !verifying;
+    $('#btnSkip').hidden = !verifying;
+    if (verifying) {
+      const v = sorter.v;
+      $('#progress').style.width = '100%';
+      $('#status').textContent = `決勝リーグ ${v.pass}周目：${v.i + 1} / ${v.k - 1}（並びが変わると再確認します）`;
+    } else {
+      const pct = Math.min(99, Math.floor(sorter.done / estimate(sorter.n) * 100));
+      $('#progress').style.width = pct + '%';
+      $('#status').textContent = `進捗: 約 ${pct}%`;
+    }
+    $('#btnUndo').disabled = session.choices.length === 0;
+  }
+
+  function choose(ch) {
+    if (!sorter || sorter.phase === 'done' || !sorter.pair) return;
+    session.choices.push(ch);
+    apply(sorter, ch);
+    if (sorter.phase !== 'done') next(sorter);
+    save();
+    renderBattle();
+  }
+  function undo() {
+    if (!session || !session.choices.length) return;
+    session.choices.pop();
+    sorter = replay(session.order, session.choices);
+    save();
+    renderBattle();
+  }
+
+  function renderResult() {
+    show('result-area');
+    clear();
+    const list = sorter.result;
+    const body = $('#result-list');
+    body.replaceChildren();
+    const rows = [];
+    let rank = 0;
+    list.forEach((id, idx) => {
+      const prev = list[idx - 1];
+      const tied = prev !== undefined && (sorter.ties.has(prev + '|' + id) || sorter.ties.has(id + '|' + prev));
+      if (!tied) rank = idx + 1;
+      rows.push({ rank, song: itemById.get(id) });
+    });
+    rows.forEach(({ rank, song }) => {
+      const tr = document.createElement('tr');
+      const td1 = document.createElement('td');
+      if (rank <= 3) td1.className = 'rank-' + rank;
+      const badge = document.createElement('span'); badge.className = 'rank-badge'; badge.textContent = rank + '位';
+      td1.appendChild(badge);
+      const td2 = document.createElement('td');
+      const wrap = document.createElement('div'); wrap.className = 'result-item';
+      const img = document.createElement('img'); img.className = 'result-thumb'; img.alt = song.title; setImg(img, song.image);
+      const name = document.createElement('span'); name.className = 'result-title'; name.textContent = song.title;
+      wrap.append(img, name); td2.appendChild(wrap);
+      tr.append(td1, td2); body.appendChild(tr);
+    });
+    const top = rows.filter(r => r.rank <= 5).map(r => `${r.rank}位: ${r.song.title}`).join('\n');
+    const text = `【高嶺のなでしこ 好き曲ソート結果】\n${top}`;
+    $('#x-share').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) +
+      '&hashtags=' + encodeURIComponent('高嶺のなでしこ,たかねこソート') +
+      '&url=' + encodeURIComponent(location.href);
+  }
+
+  /* ================= 開始・再開 ================= */
+  function start() {
+    const ids = [...selected];
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    session = { order: ids, choices: [] };
+    sorter = replay(session.order, session.choices);
+    save();
+    renderBattle();
+  }
+  function resume() {
+    session = load();
+    sorter = replay(session.order, session.choices);
+    renderBattle();
+  }
+
+  function bind() {
+    $('#selAll').onclick = () => { items.forEach(i => selected.add(i.id)); renderSetup(); };
+    $('#selNone').onclick = () => { selected.clear(); renderSetup(); };
+    $('#startBtn').onclick = start;
+    $('#resumeBtn').onclick = resume;
+    $('#discardBtn').onclick = () => { clear(); renderSetup(); };
+    $('#btnL').onclick = () => choose('l');
+    $('#btnR').onclick = () => choose('r');
+    $('#btnTie').onclick = () => choose('t');
+    $('#btnUndo').onclick = undo;
+    $('#btnSkip').onclick = () => choose('s');
+    $('#btnHome').onclick = renderSetup;
+    $('#againBtn').onclick = () => { clear(); renderSetup(); };
+    document.addEventListener('keydown', e => {
+      if ($('#sort-area').hidden) return;
+      if (e.key === 'ArrowLeft') choose('l');
+      else if (e.key === 'ArrowRight') choose('r');
+      else if (e.key === 'ArrowDown') { e.preventDefault(); choose('t'); }
+      else if (e.key === 'z' || e.key === 'Z') undo();
+    });
+  }
+
+  fetch('./songs.json', { cache: 'no-cache' })
+    .then(r => { if (!r.ok) throw new Error('songs.json: ' + r.status); return r.json(); })
+    .then(data => {
+      items = data.map((d, i) => ({ id: d.id ?? i + 1, title: d.title, image: d.image }));
+      items.forEach(it => itemById.set(it.id, it));
+      selected = new Set(items.map(i => i.id));
+      bind();
+      renderSetup();
+    })
+    .catch(err => {
+      $('#setup-area').hidden = false;
+      $('#setup-area').textContent = 'エラー: songs.json が見つからないか、読み込めませんでした。';
+      console.error(err);
+    });
+})();
+</script>
+</body>
+</html>
