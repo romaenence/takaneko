@@ -341,7 +341,7 @@
     const top = rows.filter(r => r.rank <= 5).map(r => `${r.rank}位: ${r.song.title}`).join('\n');
     const text = `【高嶺のなでしこ 好き曲ソート結果】\n${top}`;
     $('#x-share').href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) +
-      '&hashtags=' + encodeURIComponent('高嶺のなでしこ,たかねこソート') +
+      '&hashtags=' + encodeURIComponent('高嶺のなでしこ,たかねこ好き曲ソート') +
       '&url=' + encodeURIComponent(location.href);
     shareTextForImg = text + '\n#高嶺のなでしこ #たかねこソート';
     buildShareImage(rows);
