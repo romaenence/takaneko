@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -267,7 +267,7 @@
 
 <div class="container">
   <h1>高嶺のなでしこ 好き曲ソート</h1>
-  <p class="desc">直感的に「好き・良い」と思う曲を選んでください！</p>
+  <p class="desc">直感的に「好き・良い」と思う方を選んでください！</p>
 
   <div id="sort-area">
     <div class="progress-wrapper">
@@ -279,11 +279,11 @@
 
     <div class="choice-container">
       <div class="choice-card" onclick="selectChoice(-1)">
-        <img id="left-img" class="choice-img" src="" alt="選択肢A">
+        <img id="left-img" class="choice-img" src="" alt="" onerror="this.style.display='none'">
         <div id="left-title" class="choice-title">選択肢 A</div>
       </div>
       <div class="choice-card" onclick="selectChoice(1)">
-        <img id="right-img" class="choice-img" src="" alt="選択肢B">
+        <img id="right-img" class="choice-img" src="" alt="" onerror="this.style.display='none'">
         <div id="right-title" class="choice-title">選択肢 B</div>
       </div>
     </div>
@@ -295,7 +295,7 @@
   </div>
 
   <div id="result-area">
-    <h2>$D83C$DF89 ランキング結果</h2>
+    <h2>🎉 ランキング結果</h2>
     <table class="rank-table">
       <thead>
         <tr>
@@ -359,45 +359,62 @@ let finishSize = 0;
 let totalSize = 0;
 let historyStack = [];
 
+// データ取得用の補助関数（文字列・オブジェクト両対応）
+function getItemData(index) {
+  let raw = items[index];
+  if (typeof raw === 'string') {
+    return { title: raw, image: '' };
+  }
+  return {
+    title: raw && raw.title ? raw.title : String(raw),
+    image: raw && raw.image ? raw.image : ''
+  };
+}
+
 function initSort() {
-  lstMember = items.map((_, index) => index);
-  
-  for (let i = lstMember.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [lstMember[i], lstMember[j]] = [lstMember[j], lstMember[i]];
-  }
-
-  parent = [];
-  rec = [];
-  historyStack = [];
-
-  let temp = lstMember.map(x => [x]);
-  parent.push(temp);
-
-  while (parent[parent.length - 1].length > 1) {
-    let current = parent[parent.length - 1];
-    let next = [];
-    for (let i = 0; i < current.length; i += 2) {
-      if (i + 1 < current.length) {
-        next.push([]);
-      } else {
-        next.push(current[i]);
-      }
+  try {
+    lstMember = items.map((_, index) => index);
+    
+    for (let i = lstMember.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lstMember[i], lstMember[j]] = [lstMember[j], lstMember[i]];
     }
-    parent.push(next);
+
+    parent = [];
+    rec = [];
+    historyStack = [];
+
+    let temp = lstMember.map(x => [x]);
+    parent.push(temp);
+
+    while (parent[parent.length - 1].length > 1) {
+      let current = parent[parent.length - 1];
+      let next = [];
+      for (let i = 0; i < current.length; i += 2) {
+        if (i + 1 < current.length) {
+          next.push([]);
+        } else {
+          next.push(current[i]);
+        }
+      }
+      parent.push(next);
+    }
+
+    cmp1 = parent.length - 2;
+    cmp2 = 0;
+    head1 = 0;
+    head2 = 0;
+    finishSize = 0;
+    totalSize = items.length * Math.ceil(Math.log2(items.length));
+
+    document.getElementById("sort-area").style.display = "block";
+    document.getElementById("result-area").style.display = "none";
+
+    showQuestion();
+  } catch (err) {
+    document.getElementById("status").innerText = "エラー: " + err.message;
+    console.error(err);
   }
-
-  cmp1 = parent.length - 2;
-  cmp2 = 0;
-  head1 = 0;
-  head2 = 0;
-  finishSize = 0;
-  totalSize = items.length * Math.ceil(Math.log2(items.length));
-
-  document.getElementById("sort-area").style.display = "block";
-  document.getElementById("result-area").style.display = "none";
-
-  showQuestion();
 }
 
 function showQuestion() {
@@ -420,14 +437,26 @@ function showQuestion() {
     return;
   }
 
-  let leftIdx = leftList[head1];
-  let rightIdx = rightList[head2];
+  let leftData = getItemData(leftList[head1]);
+  let rightData = getItemData(rightList[head2]);
 
-  document.getElementById("left-title").innerText = items[leftIdx].title;
-  document.getElementById("left-img").src = items[leftIdx].image;
+  let leftImg = document.getElementById("left-img");
+  if (leftData.image) {
+    leftImg.style.display = "block";
+    leftImg.src = leftData.image;
+  } else {
+    leftImg.style.display = "none";
+  }
+  document.getElementById("left-title").innerText = leftData.title;
 
-  document.getElementById("right-title").innerText = items[rightIdx].title;
-  document.getElementById("right-img").src = items[rightIdx].image;
+  let rightImg = document.getElementById("right-img");
+  if (rightData.image) {
+    rightImg.style.display = "block";
+    rightImg.src = rightData.image;
+  } else {
+    rightImg.style.display = "none";
+  }
+  document.getElementById("right-title").innerText = rightData.title;
 
   let percent = Math.min(100, Math.floor((finishSize / totalSize) * 100));
   document.getElementById("progress").style.width = percent + "%";
@@ -502,13 +531,15 @@ function showResult() {
   finalRank.forEach((itemIdx, rank) => {
     let rankNum = rank + 1;
     let rankClass = rankNum <= 3 ? `rank-${rankNum}` : "";
-    let song = items[itemIdx];
+    let song = getItemData(itemIdx);
     
+    let imgHtml = song.image ? `<img class="result-thumb" src="${song.image}" alt="${song.title}" onerror="this.style.display='none'">` : '';
+
     let row = `<tr>
       <td class="${rankClass}"><span class="rank-badge">${rankNum}位</span></td>
       <td>
         <div class="result-item">
-          <img class="result-thumb" src="${song.image}" alt="${song.title}">
+          ${imgHtml}
           <span class="result-title">${song.title}</span>
         </div>
       </td>
@@ -524,7 +555,7 @@ function showResult() {
   document.getElementById("x-share").href = `https://twitter.com/intent/tweet?text=${shareText}&hashtags=高嶺のなでしこ,たかねこソート&url=${pageUrl}`;
 }
 
-window.onload = initSort;
+window.addEventListener('DOMContentLoaded', initSort);
 </script>
 
 </body>
