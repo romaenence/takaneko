@@ -267,7 +267,7 @@
 
 <div class="container">
   <h1>高嶺のなでしこ 好き曲ソート</h1>
-  <p class="desc">直感的に「好き・良い」と思う曲を選んでね！</p>
+  <p class="desc">直感的に「好き・良い」と思う曲を選んでね</p>
 
   <div id="sort-area">
     <div class="progress-wrapper">
@@ -279,11 +279,11 @@
 
     <div class="choice-container">
       <div class="choice-card" onclick="selectChoice(-1)">
-        <img id="left-img" class="choice-img" src="" alt="" onerror="handleImgError(this)">
+        <img id="left-img" class="choice-img" src="" alt="">
         <div id="left-title" class="choice-title">選択肢 A</div>
       </div>
       <div class="choice-card" onclick="selectChoice(1)">
-        <img id="right-img" class="choice-img" src="" alt="" onerror="handleImgError(this)">
+        <img id="right-img" class="choice-img" src="" alt="">
         <div id="right-title" class="choice-title">選択肢 B</div>
       </div>
     </div>
@@ -314,40 +314,41 @@
 </div>
 
 <script>
+// 全楽曲のYouTube高画質サムネイルURL（確実表示）
 const items = [
-  { "title": "僕らの青", "image": "https://img.youtube.com/vi/dtBq4Yo57rk/maxresdefault.jpg" },
-  { "title": "生きてりゃいい", "image": "https://img.youtube.com/vi/957yJCyB-tk/maxresdefault.jpg" },
-  { "title": "花は誓いを忘れない", "image": "https://img.youtube.com/vi/f1ss7kWQnY8/maxresdefault.jpg" },
-  { "title": "この世界は嘘でできている", "image": "https://img.youtube.com/vi/pfrBPp_btAQ/maxresdefault.jpg" },
-  { "title": "ライフクエスト", "image": "https://img.youtube.com/vi/5ezn2DJbK7s/maxresdefault.jpg" },
-  { "title": "初恋のこたえ。", "image": "https://img.youtube.com/vi/MdzIkBvRMC0/maxresdefault.jpg" },
-  { "title": "アイドル衣装", "image": "https://img.youtube.com/vi/a7CAn_FIfSk/maxresdefault.jpg" },
-  { "title": "メランコリックハニー", "image": "https://img.youtube.com/vi/645TOVz8on8/maxresdefault.jpg" },
-  { "title": "Cute for life.", "image": "https://img.youtube.com/vi/9tN1esSj2Tg/maxresdefault.jpg" },
-  { "title": "恋を知っている", "image": "https://img.youtube.com/vi/iSvx1zS-zSs/maxresdefault.jpg" },
-  { "title": "アイのウイルス", "image": "https://img.youtube.com/vi/Bsq2ZKelIqQ/maxresdefault.jpg" },
-  { "title": "I'M YOUR IDOL.", "image": "https://img.youtube.com/vi/iz6KQup9Uys/maxresdefault.jpg" },
-  { "title": "アドレナリンゲーム", "image": "https://img.youtube.com/vi/n_8LTS92LXE/maxresdefault.jpg" },
-  { "title": "死ぬまでダーリン", "image": "https://img.youtube.com/vi/SB-r8BmlMhI/maxresdefault.jpg" },
-  { "title": "モテチェン！", "image": "https://img.youtube.com/vi/ivfMBjNqLZE/maxresdefault.jpg" },
-  { "title": "私より好きでいて", "image": "https://img.youtube.com/vi/KGb7TDtQ928/maxresdefault.jpg" },
-  { "title": "センパイ。", "image": "https://img.youtube.com/vi/rOZBjopRSv8/maxresdefault.jpg" },
-  { "title": "恋を知った世界", "image": "https://img.youtube.com/vi/iSvx1zS-zSs/maxresdefault.jpg" },
-  { "title": "私は怪物", "image": "https://img.youtube.com/vi/LG3Kho_3ZOA/maxresdefault.jpg" },
-  { "title": "可愛いって言われたい", "image": "https://img.youtube.com/vi/V0qbPWbS9u8/maxresdefault.jpg" },
-  { "title": "美しく生きろ", "image": "https://img.youtube.com/vi/UXLlIXV7YUc/maxresdefault.jpg" },
-  { "title": "いつか私がママになったら", "image": "https://img.youtube.com/vi/B6ibZx9KcH4/maxresdefault.jpg" },
-  { "title": "すきっちゅーの！", "image": "https://img.youtube.com/vi/mBmSMIVrw1o/maxresdefault.jpg" },
-  { "title": "初恋のひと。", "image": "https://img.youtube.com/vi/KgcjPd8n2Es/maxresdefault.jpg" },
-  { "title": "決戦スピリット", "image": "https://img.youtube.com/vi/B2S-jwfs6Ic/maxresdefault.jpg" },
-  { "title": "革命の女王", "image": "https://img.youtube.com/vi/WcJbDYD9u94/maxresdefault.jpg" },
-  { "title": "僕は君になれない", "image": "https://img.youtube.com/vi/-Mm3QGGxg1k/maxresdefault.jpg" },
-  { "title": "男の子の目的は何？", "image": "https://img.youtube.com/vi/-hTyIuPim5o/maxresdefault.jpg" },
-  { "title": "女の子は強い", "image": "https://img.youtube.com/vi/edid66UmfiQ/maxresdefault.jpg" },
-  { "title": "可愛くてごめん", "image": "https://img.youtube.com/vi/MPywGQPLJPo/maxresdefault.jpg" },
-  { "title": "ユメムスビ", "image": "https://img.youtube.com/vi/qgYnKvdcMJQ/maxresdefault.jpg" },
-  { "title": "アンチファン", "image": "https://img.youtube.com/vi/dzOGNlmCi7Y/maxresdefault.jpg" },
-  { "title": "Overture.", "image": "https://img.youtube.com/vi/YcGoOQcXjO8/maxresdefault.jpg" }
+  { "title": "僕らの青", "image": "https://img.youtube.com/vi/dtBq4Yo57rk/hqdefault.jpg" },
+  { "title": "生きてりゃいい", "image": "https://img.youtube.com/vi/957yJCyB-tk/hqdefault.jpg" },
+  { "title": "花は誓いを忘れない", "image": "https://img.youtube.com/vi/f1ss7kWQnY8/hqdefault.jpg" },
+  { "title": "この世界は嘘でできている", "image": "https://img.youtube.com/vi/pfrBPp_btAQ/hqdefault.jpg" },
+  { "title": "ライフクエスト", "image": "https://img.youtube.com/vi/5ezn2DJbK7s/hqdefault.jpg" },
+  { "title": "初恋のこたえ。", "image": "https://img.youtube.com/vi/MdzIkBvRMC0/hqdefault.jpg" },
+  { "title": "アイドル衣装", "image": "https://img.youtube.com/vi/a7CAn_FIfSk/hqdefault.jpg" },
+  { "title": "メランコリックハニー", "image": "https://img.youtube.com/vi/645TOVz8on8/hqdefault.jpg" },
+  { "title": "Cute for life.", "image": "https://img.youtube.com/vi/9tN1esSj2Tg/hqdefault.jpg" },
+  { "title": "恋を知っている", "image": "https://img.youtube.com/vi/iSvx1zS-zSs/hqdefault.jpg" },
+  { "title": "アイのウイルス", "image": "https://img.youtube.com/vi/Bsq2ZKelIqQ/hqdefault.jpg" },
+  { "title": "I'M YOUR IDOL.", "image": "https://img.youtube.com/vi/iz6KQup9Uys/hqdefault.jpg" },
+  { "title": "アドレナリンゲーム", "image": "https://img.youtube.com/vi/n_8LTS92LXE/hqdefault.jpg" },
+  { "title": "死ぬまでダーリン", "image": "https://img.youtube.com/vi/SB-r8BmlMhI/hqdefault.jpg" },
+  { "title": "モテチェン！", "image": "https://img.youtube.com/vi/ivfMBjNqLZE/hqdefault.jpg" },
+  { "title": "私より好きでいて", "image": "https://img.youtube.com/vi/KGb7TDtQ928/hqdefault.jpg" },
+  { "title": "センパイ。", "image": "https://img.youtube.com/vi/rOZBjopRSv8/hqdefault.jpg" },
+  { "title": "恋を知った世界", "image": "https://img.youtube.com/vi/iSvx1zS-zSs/hqdefault.jpg" },
+  { "title": "私は怪物", "image": "https://img.youtube.com/vi/LG3Kho_3ZOA/hqdefault.jpg" },
+  { "title": "可愛いって言われたい", "image": "https://img.youtube.com/vi/V0qbPWbS9u8/hqdefault.jpg" },
+  { "title": "美しく生きろ", "image": "https://img.youtube.com/vi/UXLlIXV7YUc/hqdefault.jpg" },
+  { "title": "いつか私がママになったら", "image": "https://img.youtube.com/vi/B6ibZx9KcH4/hqdefault.jpg" },
+  { "title": "すきっちゅーの！", "image": "https://img.youtube.com/vi/mBmSMIVrw1o/hqdefault.jpg" },
+  { "title": "初恋のひと。", "image": "https://img.youtube.com/vi/KgcjPd8n2Es/hqdefault.jpg" },
+  { "title": "決戦スピリット", "image": "https://img.youtube.com/vi/B2S-jwfs6Ic/hqdefault.jpg" },
+  { "title": "革命の女王", "image": "https://img.youtube.com/vi/WcJbDYD9u94/hqdefault.jpg" },
+  { "title": "僕は君になれない", "image": "https://img.youtube.com/vi/-Mm3QGGxg1k/hqdefault.jpg" },
+  { "title": "男の子の目的は何？", "image": "https://img.youtube.com/vi/-hTyIuPim5o/hqdefault.jpg" },
+  { "title": "女の子は強い", "image": "https://img.youtube.com/vi/edid66UmfiQ/hqdefault.jpg" },
+  { "title": "可愛くてごめん", "image": "https://img.youtube.com/vi/MPywGQPLJPo/hqdefault.jpg" },
+  { "title": "ユメムスビ", "image": "https://img.youtube.com/vi/qgYnKvdcMJQ/hqdefault.jpg" },
+  { "title": "アンチファン", "image": "https://img.youtube.com/vi/dzOGNlmCi7Y/hqdefault.jpg" },
+  { "title": "Overture.", "image": "https://img.youtube.com/vi/YcGoOQcXjO8/hqdefault.jpg" }
 ];
 
 let lstMember = [];
@@ -358,15 +359,6 @@ let head1 = 0, head2 = 0;
 let finishSize = 0;
 let totalSize = 0;
 let historyStack = [];
-
-// 画像エラー時の自動補正（maxresdefault -> hqdefault）
-function handleImgError(img) {
-  if (img.src.includes('maxresdefault.jpg')) {
-    img.src = img.src.replace('maxresdefault.jpg', 'hqdefault.jpg');
-  } else {
-    img.style.display = 'none';
-  }
-}
 
 function getItemData(index) {
   let raw = items[index];
@@ -449,21 +441,13 @@ function showQuestion() {
   let rightData = getItemData(rightList[head2]);
 
   let leftImg = document.getElementById("left-img");
-  if (leftData.image) {
-    leftImg.style.display = "block";
-    leftImg.src = leftData.image;
-  } else {
-    leftImg.style.display = "none";
-  }
+  leftImg.style.display = "block";
+  leftImg.src = leftData.image;
   document.getElementById("left-title").innerText = leftData.title;
 
   let rightImg = document.getElementById("right-img");
-  if (rightData.image) {
-    rightImg.style.display = "block";
-    rightImg.src = rightData.image;
-  } else {
-    rightImg.style.display = "none";
-  }
+  rightImg.style.display = "block";
+  rightImg.src = rightData.image;
   document.getElementById("right-title").innerText = rightData.title;
 
   let percent = Math.min(100, Math.floor((finishSize / totalSize) * 100));
@@ -541,13 +525,11 @@ function showResult() {
     let rankClass = rankNum <= 3 ? `rank-${rankNum}` : "";
     let song = getItemData(itemIdx);
     
-    let imgHtml = song.image ? `<img class="result-thumb" src="${song.image}" alt="${song.title}" onerror="handleImgError(this)">` : '';
-
     let row = `<tr>
       <td class="${rankClass}"><span class="rank-badge">${rankNum}位</span></td>
       <td>
         <div class="result-item">
-          ${imgHtml}
+          <img class="result-thumb" src="${song.image}" alt="${song.title}">
           <span class="result-title">${song.title}</span>
         </div>
       </td>
