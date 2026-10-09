@@ -1,0 +1,550 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高嶺のなでしこ 好き曲ソート</title>
+  <style>
+    :root {
+      --primary-color: #ff6b8b;
+      --bg-color: #fff5f7;
+      --card-bg: #ffffff;
+      --text-main: #4a4a4a;
+      --text-sub: #888888;
+      --border-color: #ffe1e8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 580px;
+      width: 100%;
+      background: var(--card-bg);
+      padding: 24px 16px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(255, 107, 139, 0.12);
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      color: var(--primary-color);
+      margin: 0 0 6px 0;
+      letter-spacing: 0.05em;
+    }
+
+    p.desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 20px;
+    }
+
+    .progress-wrapper {
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff9a9e 0%, #ff6b8b 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+
+    #status {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    .choice-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .choice-card {
+      flex: 1;
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+    }
+
+    .choice-card:hover {
+      border-color: var(--primary-color);
+      background-color: #fff9fa;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(255, 107, 139, 0.2);
+    }
+
+    .choice-card:active {
+      transform: translateY(0);
+    }
+
+    .choice-img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background-color: #fce4ec;
+    }
+
+    .choice-title {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: var(--text-main);
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    .control-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sub-btn {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      background: #f7f7f7;
+      border: 1px solid #eaeaea;
+      border-radius: 10px;
+      color: #666;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .sub-btn:hover {
+      background: #eeeeee;
+      color: #333;
+    }
+
+    #result-area {
+      display: none;
+      text-align: left;
+    }
+
+    #result-area h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+    }
+
+    .rank-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      margin-top: 8px;
+    }
+
+    .rank-table th {
+      padding: 8px 8px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .rank-table td {
+      padding: 10px 8px;
+      background: #fff;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .rank-table td:first-child {
+      border-left: 1px solid var(--border-color);
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+      font-weight: bold;
+      width: 65px;
+      text-align: center;
+    }
+
+    .rank-table td:last-child {
+      border-right: 1px solid var(--border-color);
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      font-weight: 500;
+    }
+
+    .rank-badge {
+      display: inline-block;
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    .rank-1 .rank-badge { background: #ffeaa7; color: #d63031; }
+    .rank-2 .rank-badge { background: #dfe6e9; color: #2d3436; }
+    .rank-3 .rank-badge { background: #fab1a0; color: #e17055; }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .result-thumb {
+      width: 70px;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+      background-color: #fce4ec;
+    }
+
+    .result-title {
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .share-area {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .share-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 20px;
+      background-color: #000000;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .share-btn:hover {
+      opacity: 0.85;
+    }
+
+    .restart-btn {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>高嶺のなでしこ 好き曲ソート</h1>
+  <p class="desc">直感的に「好き・良い」と思う曲を選んでね</p>
+
+  <div id="sort-area">
+    <div class="progress-wrapper">
+      <div class="progress-bar">
+        <div id="progress" class="progress-fill"></div>
+      </div>
+      <div id="status">準備中...</div>
+    </div>
+
+    <div class="choice-container">
+      <div class="choice-card" onclick="selectChoice(-1)">
+        <img id="left-img" class="choice-img" src="" alt="" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'56\' viewBox=\'0 0 100 56\'%3E%3Crect width=\'100\' height=\'56\' fill=\'%23ffe1e8\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'12\' fill=\'%23ff6b8b\'%3Eたかねこ%3C/text%3E%3C/svg%3E'">
+        <div id="left-title" class="choice-title">選択肢 A</div>
+      </div>
+      <div class="choice-card" onclick="selectChoice(1)">
+        <img id="right-img" class="choice-img" src="" alt="" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'56\' viewBox=\'0 0 100 56\'%3E%3Crect width=\'100\' height=\'56\' fill=\'%23ffe1e8\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'12\' fill=\'%23ff6b8b\'%3Eたかねこ%3C/text%3E%3C/svg%3E'">
+        <div id="right-title" class="choice-title">選択肢 B</div>
+      </div>
+    </div>
+
+    <div class="control-btns">
+      <button class="sub-btn" onclick="selectChoice(0)">引き分け / 両方好き</button>
+      <button class="sub-btn" onclick="undoChoice()">1つやり直す</button>
+    </div>
+  </div>
+
+  <div id="result-area">
+    <h2>$D83C$DF89 ランキング結果</h2>
+    <table class="rank-table">
+      <thead>
+        <tr>
+          <th style="text-align: center;">順位</th>
+          <th>楽曲</th>
+        </tr>
+      </thead>
+      <tbody id="result-list"></tbody>
+    </table>
+
+    <div class="share-area">
+      <a id="x-share" class="share-btn" target="_blank" rel="noopener">X（旧Twitter）で結果を共有</a>
+      <button class="sub-btn restart-btn" onclick="initSort()">もう一度やり直す</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// 曲名とYouTube動画IDの正確なリスト
+const songData = [
+  { "title": "美しく生きろ", "vid": "UXLlIXV7YUc" },
+  { "title": "恋を知った世界", "vid": "iSvx1zS-zSs" },
+  { "title": "可愛くてごめん", "vid": "MPywGQPLJPo" },
+  { "title": "モテチェン！", "vid": "ivfMBjNqLZE" },
+  { "title": "初恋のひと。", "vid": "KgcjPd8n2Es" },
+  { "title": "初恋のこたえ。", "vid": "MdzIkBvRMC0" },
+  { "title": "決戦スピリット", "vid": "B2S-jwfs6Ic" },
+  { "title": "アンチファン", "vid": "dzOGNlmCi7Y" },
+  { "title": "センパイ。", "vid": "rOZBjopRSv8" },
+  { "title": "僕は君になれない", "vid": "-Mm3QGGxg1k" },
+  { "title": "私より好きでいて", "vid": "KGb7TDtQ928" },
+  { "title": "私は怪物", "vid": "LG3Kho_3ZOA" },
+  { "title": "可愛いって言われたい", "vid": "V0qbPWbS9u8" },
+  { "title": "すきっちゅーの！", "vid": "mBmSMIVrw1o" },
+  { "title": "アドレナリンゲーム", "vid": "n_8LTS92LXE" },
+  { "title": "アイのウイルス", "vid": "Bsq2ZKelIqQ" },
+  { "title": "死ぬまでダーリン", "vid": "SB-r8BmlMhI" },
+  { "title": "ライフクエスト", "vid": "5ezn2DJbK7s" },
+  { "title": "この世界は嘘でできている", "vid": "AvJLHtnGiWA" },
+  { "title": "花は誓いを忘れない", "vid": "N2WAUvn4z6s" },
+  { "title": "生きてりゃいい", "vid": "957yJCyB-tk" },
+  { "title": "僕らの青", "vid": "05c7BQF56nM" },
+  { "title": "ユメムスビ", "vid": "qgYnKvdcMJQ" },
+  { "title": "革命の女王", "vid": "WcJbDYD9u94" },
+  { "title": "男の子の目的は何？", "vid": "-hTyIuPim5o" },
+  { "title": "女の子は強い", "vid": "edid66UmfiQ" },
+  { "title": "Overture.", "vid": "YcGoOQcXjO8" }
+];
+
+// items配列を動的に生成してサムネイルURLを確実に構築
+const items = songData.map(song => ({
+  title: song.title,
+  image: `https://img.youtube.com/vi/${song.vid}/hqdefault.jpg`
+}));
+
+let lstMember = [];
+let parent = [];
+let rec = [];
+let cmp1 = 0, cmp2 = 0;
+let head1 = 0, head2 = 0;
+let finishSize = 0;
+let totalSize = 0;
+let historyStack = [];
+
+function getItemData(index) {
+  let raw = items[index];
+  if (!raw) return { title: "不明な楽曲", image: "" };
+  return {
+    title: raw.title || "不明な楽曲",
+    image: raw.image || ""
+  };
+}
+
+function initSort() {
+  try {
+    lstMember = items.map((_, index) => index);
+    
+    for (let i = lstMember.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [lstMember[i], lstMember[j]] = [lstMember[j], lstMember[i]];
+    }
+
+    parent = [];
+    rec = [];
+    historyStack = [];
+
+    let temp = lstMember.map(x => [x]);
+    parent.push(temp);
+
+    while (parent[parent.length - 1].length > 1) {
+      let current = parent[parent.length - 1];
+      let next = [];
+      for (let i = 0; i < current.length; i += 2) {
+        if (i + 1 < current.length) {
+          next.push([]);
+        } else {
+          next.push(current[i]);
+        }
+      }
+      parent.push(next);
+    }
+
+    cmp1 = parent.length - 2;
+    cmp2 = 0;
+    head1 = 0;
+    head2 = 0;
+    finishSize = 0;
+    totalSize = items.length * Math.ceil(Math.log2(items.length));
+
+    document.getElementById("sort-area").style.display = "block";
+    document.getElementById("result-area").style.display = "none";
+
+    showQuestion();
+  } catch (err) {
+    document.getElementById("status").innerText = "エラー: " + err.message;
+    console.error(err);
+  }
+}
+
+function showQuestion() {
+  if (cmp1 < 0) {
+    showResult();
+    return;
+  }
+
+  let leftList = parent[cmp1][cmp2 * 2];
+  let rightList = parent[cmp1][cmp2 * 2 + 1];
+
+  if (!rightList) {
+    parent[cmp1 + 1][cmp2] = leftList;
+    cmp2++;
+    if (cmp2 >= parent[cmp1 + 1].length) {
+      cmp1--;
+      cmp2 = 0;
+    }
+    showQuestion();
+    return;
+  }
+
+  let leftData = getItemData(leftList[head1]);
+  let rightData = getItemData(rightList[head2]);
+
+  let leftImg = document.getElementById("left-img");
+  leftImg.style.display = "block";
+  leftImg.src = leftData.image;
+  document.getElementById("left-title").innerText = leftData.title;
+
+  let rightImg = document.getElementById("right-img");
+  rightImg.style.display = "block";
+  rightImg.src = rightData.image;
+  document.getElementById("right-title").innerText = rightData.title;
+
+  let percent = Math.min(100, Math.floor((finishSize / totalSize) * 100));
+  document.getElementById("progress").style.width = percent + "%";
+  document.getElementById("status").innerText = `進捗: 約 ${percent}%`;
+}
+
+function selectChoice(flag) {
+  historyStack.push(JSON.parse(JSON.stringify({
+    parent, cmp1, cmp2, head1, head2, finishSize, rec
+  })));
+
+  let leftList = parent[cmp1][cmp2 * 2];
+  let rightList = parent[cmp1][cmp2 * 2 + 1];
+
+  if (flag === -1) {
+    rec.push(leftList[head1]);
+    head1++;
+  } else if (flag === 1) {
+    rec.push(rightList[head2]);
+    head2++;
+  } else {
+    rec.push(leftList[head1]);
+    rec.push(rightList[head2]);
+    head1++;
+    head2++;
+  }
+
+  finishSize++;
+
+  if (head1 >= leftList.length || head2 >= rightList.length) {
+    if (head1 < leftList.length) rec = rec.concat(leftList.slice(head1));
+    if (head2 < rightList.length) rec = rec.concat(rightList.slice(head2));
+
+    parent[cmp1 + 1][cmp2] = rec;
+    rec = [];
+    head1 = 0;
+    head2 = 0;
+    cmp2++;
+
+    if (cmp2 >= parent[cmp1 + 1].length) {
+      cmp1--;
+      cmp2 = 0;
+    }
+  }
+
+  showQuestion();
+}
+
+function undoChoice() {
+  if (historyStack.length === 0) return;
+  let state = historyStack.pop();
+  parent = state.parent;
+  cmp1 = state.cmp1;
+  cmp2 = state.cmp2;
+  head1 = state.head1;
+  head2 = state.head2;
+  finishSize = state.finishSize;
+  rec = state.rec;
+  showQuestion();
+}
+
+function showResult() {
+  document.getElementById("sort-area").style.display = "none";
+  document.getElementById("result-area").style.display = "block";
+
+  let finalRank = parent[parent.length - 1][0];
+  let resultBody = document.getElementById("result-list");
+  resultBody.innerHTML = "";
+
+  let shareText = "【高嶺のなでしこ 好き曲ソート結果】%0A";
+
+  finalRank.forEach((itemIdx, rank) => {
+    let rankNum = rank + 1;
+    let rankClass = rankNum <= 3 ? `rank-${rankNum}` : "";
+    let song = getItemData(itemIdx);
+    
+    let row = `<tr>
+      <td class="${rankClass}"><span class="rank-badge">${rankNum}位</span></td>
+      <td>
+        <div class="result-item">
+          <img class="result-thumb" src="${song.image}" alt="${song.title}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'70\' height=\'40\' viewBox=\'0 0 70 40\'%3E%3Crect width=\'70\' height=\'40\' fill=\'%23ffe1e8\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'10\' fill=\'%23ff6b8b\'%3Eたかねこ%3C/text%3E%3C/svg%3E'">
+          <span class="result-title">${song.title}</span>
+        </div>
+      </td>
+    </tr>`;
+    resultBody.innerHTML += row;
+
+    if (rankNum <= 5) {
+      shareText += `${rankNum}位: ${song.title}%0A`;
+    }
+  });
+
+  let pageUrl = encodeURIComponent(window.location.href);
+  document.getElementById("x-share").href = `https://twitter.com/intent/tweet?text=${shareText}&hashtags=高嶺のなでしこ,たかねこソート&url=${pageUrl}`;
+}
+
+window.addEventListener('DOMContentLoaded', initSort);
+</script>
+
+</body>
+</html>
