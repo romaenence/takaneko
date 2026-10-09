@@ -1,172 +1,474 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>人気投票ソート</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>高嶺のなでしこ 好き曲ソート</title>
+  <style>
+    :root {
+      --primary-color: #ff6b8b;
+      --primary-hover: #ff5277;
+      --bg-color: #fff5f7;
+      --card-bg: #ffffff;
+      --text-main: #4a4a4a;
+      --text-sub: #888888;
+      --border-color: #ffe1e8;
+    }
 
-<style>
-body {
-  font-family: "Noto Sans JP", sans-serif;
-  background: #f7f7f7;
-  margin: 0;
-  padding: 0;
-  text-align: center;
-}
+    * {
+      box-sizing: border-box;
+    }
 
-header {
-  background: #ff66a5;
-  color: white;
-  padding: 15px;
-  font-size: 22px;
-  font-weight: bold;
-}
+    body {
+      font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-#container {
-  margin-top: 20px;
-}
+    .container {
+      max-width: 520px;
+      width: 100%;
+      background: var(--card-bg);
+      padding: 28px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(255, 107, 139, 0.12);
+      text-align: center;
+    }
 
-.song-box {
-  width: 90%;
-  max-width: 400px;
-  background: white;
-  margin: 10px auto;
-  padding: 10px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  cursor: pointer;
-  transition: 0.2s;
-}
+    h1 {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      margin: 0 0 8px 0;
+      letter-spacing: 0.05em;
+    }
 
-.song-box:hover {
-  transform: scale(1.03);
-}
+    p.desc {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 24px;
+    }
 
-.song-box img {
-  width: 100%;
-  border-radius: 10px;
-}
+    /* 進捗バー */
+    .progress-wrapper {
+      margin-bottom: 24px;
+    }
 
-.song-title {
-  font-size: 18px;
-  margin-top: 10px;
-  font-weight: bold;
-}
+    .progress-bar {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 10px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
 
-#result {
-  margin: 20px;
-  padding: 10px;
-}
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff9a9e 0%, #ff6b8b 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
 
-.result-item {
-  background: white;
-  margin: 8px auto;
-  padding: 10px;
-  width: 90%;
-  max-width: 400px;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-  font-size: 18px;
-}
-</style>
+    #status {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      font-weight: 500;
+    }
+
+    /* 選択ボタンエリア */
+    .choice-container {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .choice-btn {
+      flex: 1;
+      padding: 24px 12px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+      line-height: 1.4;
+    }
+
+    .choice-btn:hover {
+      border-color: var(--primary-color);
+      background-color: #fff9fa;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 107, 139, 0.18);
+      color: var(--primary-color);
+    }
+
+    .choice-btn:active {
+      transform: translateY(0);
+    }
+
+    /* サブボタン（引き分け・やり直し） */
+    .control-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sub-btn {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      background: #f7f7f7;
+      border: 1px solid #eaeaea;
+      border-radius: 10px;
+      color: #666;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .sub-btn:hover {
+      background: #eeeeee;
+      color: #333;
+    }
+
+    /* 結果画面 */
+    #result-area {
+      display: none;
+      text-align: left;
+    }
+
+    #result-area h2 {
+      text-align: center;
+      font-size: 1.3rem;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+
+    .rank-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+      margin-top: 8px;
+    }
+
+    .rank-table th {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .rank-table td {
+      padding: 12px;
+      background: #fff;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .rank-table td:first-child {
+      border-left: 1px solid var(--border-color);
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+      font-weight: bold;
+      width: 25%;
+      text-align: center;
+    }
+
+    .rank-table td:last-child {
+      border-right: 1px solid var(--border-color);
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+      font-weight: 500;
+    }
+
+    /* 上位順位の強調バッジ */
+    .rank-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    .rank-1 .rank-badge { background: #ffeaa7; color: #d63031; }
+    .rank-2 .rank-badge { background: #dfe6e9; color: #2d3436; }
+    .rank-3 .rank-badge { background: #fab1a0; color: #e17055; }
+
+    /* シェア・操作ボタン */
+    .share-area {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    .share-btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 20px;
+      background-color: #000000;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .share-btn:hover {
+      opacity: 0.85;
+    }
+
+    .restart-btn {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+    }
+  </style>
 </head>
-
 <body>
 
-<header>人気投票ソート</header>
+<div class="container">
+  <h1>高嶺のなでしこ ソート</h1>
+  <p class="desc">直感で直感的に「好き・良い」と思う方を選んでください！</p>
 
-<div id="container">
-  <div id="choiceA" class="song-box"></div>
-  <div id="choiceB" class="song-box"></div>
+  <!-- ソート処理画面 -->
+  <div id="sort-area">
+    <div class="progress-wrapper">
+      <div class="progress-bar">
+        <div id="progress" class="progress-fill"></div>
+      </div>
+      <div id="status">準備中...</div>
+    </div>
+
+    <div class="choice-container">
+      <button id="left-btn" class="choice-btn" onclick="selectChoice(-1)">選択肢 A</button>
+      <button id="right-btn" class="choice-btn" onclick="selectChoice(1)">選択肢 B</button>
+    </div>
+
+    <div class="control-btns">
+      <button class="sub-btn" onclick="selectChoice(0)">引き分け / 両方好き</button>
+      <button class="sub-btn" onclick="undoChoice()">1つやり直す</button>
+    </div>
+  </div>
+
+  <!-- 結果表示画面 -->
+  <div id="result-area">
+    <h2>🎉 ランキング結果</h2>
+    <table class="rank-table">
+      <thead>
+        <tr>
+          <th style="text-align: center;">順位</th>
+          <th>項目名</th>
+        </tr>
+      </thead>
+      <tbody id="result-list"></tbody>
+    </table>
+
+    <div class="share-area">
+      <a id="x-share" class="share-btn" target="_blank" rel="noopener">X（旧Twitter）で結果を共有</a>
+      <button class="sub-btn restart-btn" onclick="initSort()">もう一度やり直す</button>
+    </div>
+  </div>
 </div>
 
-<div id="result"></div>
-
 <script>
-// ------------------------------
-// 1. 曲データ読み込み
-// ------------------------------
-let songs = [];
-fetch("songs.json")
-  .then(res => res.json())
-  .then(data => {
-    songs = data;
-    startSort();
-  });
+// ============================================================
+// ソート対象のリスト（項目を変更・追加する場合はここを更新）
+// ============================================================
+const items = [
+  "城月菜央",
+  "涼海すず",
+  "橋本桃呼",
+  "葉月砂耶",
+  "春野莉々",
+  "東山恵里沙",
+  "日向端ひな",
+  "星谷美来",
+  "松本ももな",
+  "籾山ひめり"
+];
 
-// ------------------------------
-// 2. ソート用変数
-// ------------------------------
-let left = 0;
-let right = 1;
-let ranking = [];
+// マージソート用変数
+let lstMember = [];
+let parent = [];
+let rec = [];
+let equal = [];
+let cmp1 = 0, cmp2 = 0;
+let head1 = 0, head2 = 0;
+let finishSize = 0;
+let totalSize = 0;
+let historyStack = [];
 
-// ------------------------------
-// 3. ソート開始
-// ------------------------------
-function startSort() {
-  ranking = songs.map((s, i) => ({ index: i, score: 0 }));
-  showChoices();
+function initSort() {
+  lstMember = items.map((_, index) => index);
+  
+  // ランダムシャッフル
+  for (let i = lstMember.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [lstMember[i], lstMember[j]] = [lstMember[j], lstMember[i]];
+  }
+
+  parent = [];
+  rec = [];
+  historyStack = [];
+
+  let temp = lstMember.map(x => [x]);
+  parent.push(temp);
+
+  while (parent[parent.length - 1].length > 1) {
+    let current = parent[parent.length - 1];
+    let next = [];
+    for (let i = 0; i < current.length; i += 2) {
+      if (i + 1 < current.length) {
+        next.push([]);
+      } else {
+        next.push(current[i]);
+      }
+    }
+    parent.push(next);
+  }
+
+  cmp1 = parent.length - 2;
+  cmp2 = 0;
+  head1 = 0;
+  head2 = 0;
+  finishSize = 0;
+  totalSize = items.length * Math.ceil(Math.log2(items.length));
+
+  document.getElementById("sort-area").style.display = "block";
+  document.getElementById("result-area").style.display = "none";
+
+  showQuestion();
 }
 
-// ------------------------------
-// 4. 2択表示
-// ------------------------------
-function showChoices() {
-  if (right >= songs.length) {
-    finishSort();
+function showQuestion() {
+  if (cmp1 < 0) {
+    showResult();
     return;
   }
 
-  const songA = songs[left];
-  const songB = songs[right];
+  let leftList = parent[cmp1][cmp2 * 2];
+  let rightList = parent[cmp1][cmp2 * 2 + 1];
 
-  document.getElementById("choiceA").innerHTML = `
-    <img src="${songA.image}">
-    <div class="song-title">${songA.title}</div>
-  `;
-  document.getElementById("choiceB").innerHTML = `
-    <img src="${songB.image}">
-    <div class="song-title">${songB.title}</div>
-  `;
-
-  document.getElementById("choiceA").onclick = () => vote(left);
-  document.getElementById("choiceB").onclick = () => vote(right);
-}
-
-// ------------------------------
-// 5. 投票処理
-// ------------------------------
-function vote(winnerIndex) {
-  ranking[winnerIndex].score++;
-
-  right++;
-  if (right >= songs.length) {
-    left++;
-    right = left + 1;
+  if (!rightList) {
+    parent[cmp1 + 1][cmp2] = leftList;
+    cmp2++;
+    if (cmp2 >= parent[cmp1 + 1].length) {
+      cmp1--;
+      cmp2 = 0;
+    }
+    showQuestion();
+    return;
   }
 
-  showChoices();
+  let leftIdx = leftList[head1];
+  let rightIdx = rightList[head2];
+
+  document.getElementById("left-btn").innerText = items[leftIdx];
+  document.getElementById("right-btn").innerText = items[rightIdx];
+
+  let percent = Math.min(100, Math.floor((finishSize / totalSize) * 100));
+  document.getElementById("progress").style.width = percent + "%";
+  document.getElementById("status").innerText = `進捗: 約 ${percent}%`;
 }
 
-// ------------------------------
-// 6. 結果表示
-// ------------------------------
-function finishSort() {
-  ranking.sort((a, b) => b.score - a.score);
+function selectChoice(flag) {
+  historyStack.push(JSON.parse(JSON.stringify({
+    parent, cmp1, cmp2, head1, head2, finishSize, rec
+  })));
 
-  let html = "<h2>ランキング結果</h2>";
-  ranking.forEach((r, i) => {
-    html += `
-      <div class="result-item">
-        ${i + 1}位：${songs[r.index].title}
-      </div>
-    `;
+  let leftList = parent[cmp1][cmp2 * 2];
+  let rightList = parent[cmp1][cmp2 * 2 + 1];
+
+  if (flag === -1) {
+    rec.push(leftList[head1]);
+    head1++;
+  } else if (flag === 1) {
+    rec.push(rightList[head2]);
+    head2++;
+  } else {
+    rec.push(leftList[head1]);
+    rec.push(rightList[head2]);
+    head1++;
+    head2++;
+  }
+
+  finishSize++;
+
+  if (head1 >= leftList.length || head2 >= rightList.length) {
+    if (head1 < leftList.length) rec = rec.concat(leftList.slice(head1));
+    if (head2 < rightList.length) rec = rec.concat(rightList.slice(head2));
+
+    parent[cmp1 + 1][cmp2] = rec;
+    rec = [];
+    head1 = 0;
+    head2 = 0;
+    cmp2++;
+
+    if (cmp2 >= parent[cmp1 + 1].length) {
+      cmp1--;
+      cmp2 = 0;
+    }
+  }
+
+  showQuestion();
+}
+
+function undoChoice() {
+  if (historyStack.length === 0) return;
+  let state = historyStack.pop();
+  parent = state.parent;
+  cmp1 = state.cmp1;
+  cmp2 = state.cmp2;
+  head1 = state.head1;
+  head2 = state.head2;
+  finishSize = state.finishSize;
+  rec = state.rec;
+  showQuestion();
+}
+
+function showResult() {
+  document.getElementById("sort-area").style.display = "none";
+  document.getElementById("result-area").style.display = "block";
+
+  let finalRank = parent[parent.length - 1][0];
+  let resultBody = document.getElementById("result-list");
+  resultBody.innerHTML = "";
+
+  let shareText = "【高嶺のなでしこ ソート結果】%0A";
+
+  finalRank.forEach((itemIdx, rank) => {
+    let rankNum = rank + 1;
+    let rankClass = rankNum <= 3 ? `rank-${rankNum}` : "";
+    
+    let row = `<tr>
+      <td class="${rankClass}"><span class="rank-badge">${rankNum}位</span></td>
+      <td>${items[itemIdx]}</td>
+    </tr>`;
+    resultBody.innerHTML += row;
+
+    if (rankNum <= 5) {
+      shareText += `${rankNum}位: ${items[itemIdx]}%0A`;
+    }
   });
 
-  document.getElementById("container").style.display = "none";
-  document.getElementById("result").innerHTML = html;
+  let pageUrl = encodeURIComponent(window.location.href);
+  document.getElementById("x-share").href = `https://twitter.com/intent/tweet?text=${shareText}&hashtags=高嶺のなでしこ,たかねこソート&url=${pageUrl}`;
 }
+
+window.onload = initSort;
 </script>
 
 </body>
