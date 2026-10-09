@@ -279,11 +279,11 @@
 
     <div class="choice-container">
       <div class="choice-card" onclick="selectChoice(-1)">
-        <img id="left-img" class="choice-img" src="" alt="" onerror="this.style.display='none'">
+        <img id="left-img" class="choice-img" src="" alt="" onerror="handleImgError(this)">
         <div id="left-title" class="choice-title">選択肢 A</div>
       </div>
       <div class="choice-card" onclick="selectChoice(1)">
-        <img id="right-img" class="choice-img" src="" alt="" onerror="this.style.display='none'">
+        <img id="right-img" class="choice-img" src="" alt="" onerror="handleImgError(this)">
         <div id="right-title" class="choice-title">選択肢 B</div>
       </div>
     </div>
@@ -359,7 +359,15 @@ let finishSize = 0;
 let totalSize = 0;
 let historyStack = [];
 
-// データ取得用の補助関数（文字列・オブジェクト両対応）
+// 画像エラー時の自動補正（maxresdefault -> hqdefault）
+function handleImgError(img) {
+  if (img.src.includes('maxresdefault.jpg')) {
+    img.src = img.src.replace('maxresdefault.jpg', 'hqdefault.jpg');
+  } else {
+    img.style.display = 'none';
+  }
+}
+
 function getItemData(index) {
   let raw = items[index];
   if (typeof raw === 'string') {
@@ -533,7 +541,7 @@ function showResult() {
     let rankClass = rankNum <= 3 ? `rank-${rankNum}` : "";
     let song = getItemData(itemIdx);
     
-    let imgHtml = song.image ? `<img class="result-thumb" src="${song.image}" alt="${song.title}" onerror="this.style.display='none'">` : '';
+    let imgHtml = song.image ? `<img class="result-thumb" src="${song.image}" alt="${song.title}" onerror="handleImgError(this)">` : '';
 
     let row = `<tr>
       <td class="${rankClass}"><span class="rank-badge">${rankNum}位</span></td>
