@@ -1,0 +1,134 @@
+/* 高嶺のなでしこ 好き曲ソート — デザイン定義
+   コンセプト: アルバム「A World in Our Colors / Our Colors」のテイスト
+   ・色とりどりのロゴ文字  → メンバー8色のカラーストライプ
+   ・青い鉄骨の駅舎        → 空・鉄骨の青
+   ・クリームのチェック衣装 → クリーム地 + ワインレッドのリボン
+   配色は :root の変数で変更できます */
+:root{
+  --primary:#8f1d3c;        /* リボンのワインレッド(主ボタン・見出し) */
+  --bg:#f4ecdd;             /* 衣装のクリーム */
+  --card:#fffdf8;
+  --text:#3f3a38;
+  --sub:#7a716c;
+  --border:#eadfcb;
+  --select-bg:#f3eadb;      /* 選択中の行・再開ボックス(衣装のベージュ。グレー系にするなら #ece8e3 など) */
+  --select-border:#ddcfb6;
+
+  /* メンバー8人のイメージカラー(帯・進捗バーの並びは --rainbow で指定) */
+  --c-magenta:#e4007f;      /* 濃いピンク */
+  --c-pink:#f6a9c9;         /* 薄いピンク */
+  --c-purple:#a64ca6;       /* 紫 */
+  --c-blue:#2468d6;         /* ブルー */
+  --c-sky:#45bdee;          /* 水色 */
+  --c-white:#efe9dc;        /* ホワイト(白地で消えないよう少しアイボリー寄り) */
+  --c-yellow:#f6d600;       /* イエロー */
+  --c-orange:#f28c1e;       /* オレンジ */
+  --rainbow:linear-gradient(90deg,
+    var(--c-white) 0 12.5%, var(--c-sky) 12.5% 25%, var(--c-orange) 25% 37.5%, var(--c-pink) 37.5% 50%,
+    var(--c-magenta) 50% 62.5%, var(--c-blue) 62.5% 75%, var(--c-purple) 75% 87.5%, var(--c-yellow) 87.5% 100%);
+  --rainbow-soft:linear-gradient(90deg,
+    var(--c-white), var(--c-sky), var(--c-orange), var(--c-pink),
+    var(--c-magenta), var(--c-blue), var(--c-purple), var(--c-yellow));
+}
+*{box-sizing:border-box}
+body{font-family:"Helvetica Neue",Arial,"Hiragino Kaku Gothic ProN","Hiragino Sans",Meiryo,sans-serif;
+  color:var(--text);margin:0;padding:20px 12px;display:flex;justify-content:center;min-height:100vh;
+  background-color:var(--bg);
+  /* クリーム地のチェック柄 + 上から空の青 */
+  background-image:
+    repeating-linear-gradient(0deg, rgba(143,29,60,.06) 0 2px, transparent 2px 38px),
+    repeating-linear-gradient(90deg, rgba(143,29,60,.06) 0 2px, transparent 2px 38px),
+    linear-gradient(180deg,#7ec3de 0,#cfe8f0 260px,var(--bg) 560px)}
+.container{position:relative;max-width:600px;width:100%;padding:34px 16px 24px;border-radius:20px;
+  background:var(--rainbow) no-repeat top / 100% 10px, var(--card);
+  box-shadow:0 12px 30px rgba(27,100,140,.18);text-align:center;align-self:flex-start}
+h1{font-size:1.4rem;font-weight:800;color:var(--primary);margin:0 0 6px;letter-spacing:.06em}
+h2{font-size:1.05rem;margin:0 0 6px}
+p.desc{font-size:.85rem;color:var(--sub);margin:0 0 20px}
+[hidden]{display:none!important}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid #8fd0ee;outline-offset:2px}
+
+.progress-bar{width:100%;background:#efe6d6;border-radius:10px;height:10px;overflow:hidden;margin-bottom:6px}
+.progress-fill{height:100%;background:var(--rainbow-soft);background-size:568px 100%;width:0;transition:width .3s;border-radius:10px}
+#status{font-size:.8rem;color:var(--sub);font-weight:500;margin-bottom:16px}
+.league{display:inline-block;background:#fff4de;color:var(--primary);border:1px solid #f6cf8f;
+  padding:4px 12px;border-radius:999px;font-size:.8rem;font-weight:bold;margin-bottom:10px}
+
+.choice-container{display:flex;gap:12px;margin-bottom:16px}
+.choice-card{flex:1;background:#fff;border:2px solid var(--border);border-radius:14px;padding:10px;
+  display:flex;flex-direction:column;align-items:center;box-shadow:0 4px 10px rgba(60,40,30,.05);overflow:hidden;
+  transition:all .2s;color:inherit}
+/* 左=ブルー / 右=濃いピンク(キーボードの ← → とも対応) */
+.choice-card:first-child{border-color:#c3d6f4}
+.choice-card:last-child{border-color:#f7bcd8}
+.choice-card:active{transform:scale(.98)}
+@media (hover:hover){
+  .choice-card:first-child:hover{border-color:var(--c-blue);background:#f5f9ff;transform:translateY(-3px);box-shadow:0 8px 18px rgba(36,104,214,.25)}
+  .choice-card:last-child:hover{border-color:var(--c-magenta);background:#fff7fb;transform:translateY(-3px);box-shadow:0 8px 18px rgba(228,0,127,.22)}
+}
+.choice-img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;margin-bottom:10px;background:#e9e2d6}
+.choice-title{font-size:.95rem;font-weight:bold;line-height:1.3;word-break:break-word}
+
+.control-btns{display:flex;gap:8px;flex-wrap:wrap}
+.sub-btn{flex:1;padding:10px 12px;font-size:.82rem;background:#f8f3e8;border:1px solid var(--border);border-radius:10px;color:#6b605a;font-weight:500;transition:all .2s}
+.sub-btn:hover{background:#f0e8d6;color:#3f3a38}
+.sub-btn:disabled{opacity:.4;cursor:not-allowed}
+.main-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:0;border-radius:12px;font-weight:bold;font-size:.95rem;
+  box-shadow:0 4px 12px rgba(143,29,60,.25);transition:background .2s}
+.main-btn:hover:not(:disabled){background:#a62a4c}
+.main-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.keys{color:var(--sub);font-size:.75rem;margin-top:12px}
+
+/* 対象曲の選択 */
+.setup-bar{display:flex;gap:8px;margin:10px 0}
+.song-list{max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:12px;text-align:left;background:#fff}
+.song-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.song-row:last-child{border-bottom:0}
+.song-row .box{position:relative;width:20px;height:20px;border:2px solid #d8cdb8;border-radius:6px;flex:none}
+.song-row[aria-checked="true"]{background:var(--select-bg);box-shadow:inset 4px 0 0 var(--primary)}
+.song-row[aria-checked="true"] .box{background:var(--primary);border-color:var(--primary)}
+.song-row[aria-checked="true"] .box::after{content:"";position:absolute;left:4px;top:0;width:5px;height:10px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.song-row img{width:64px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;background:#e9e2d6;flex:none}
+.song-row span.t{font-size:.9rem;font-weight:bold;line-height:1.3}
+#selCount{font-size:.85rem;color:var(--sub);margin:8px 0}
+#resumeBox{background:var(--select-bg);border:1px solid var(--select-border);border-radius:12px;padding:14px;margin-bottom:16px}
+
+/* 結果 */
+#result-area{text-align:left}
+#result-area h2{text-align:center;font-size:1.3rem;font-weight:800;color:var(--primary);margin-bottom:16px}
+.rank-table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.rank-table td{padding:10px 8px;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);vertical-align:middle}
+.rank-table td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px;font-weight:bold;width:70px;text-align:center}
+.rank-table td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
+.rank-badge{display:inline-block;padding:3px 6px;border-radius:6px;font-size:.8rem}
+.rank-1 .rank-badge{background:#ffe45c;color:#7a5b00}
+.rank-2 .rank-badge{background:#d6e8f1;color:#2f5568}
+.rank-3 .rank-badge{background:#fbd0a6;color:#a4520c}
+.result-item{display:flex;align-items:center;gap:12px}
+.result-thumb{width:70px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;flex-shrink:0;background:#e9e2d6}
+.result-title{font-size:.9rem;font-weight:bold}
+.share-area{margin-top:24px;text-align:center}
+.share-btn{display:block;width:100%;padding:12px 20px;background:#000;color:#fff;text-decoration:none;border-radius:12px;font-weight:bold;font-size:.9rem;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.share-btn:hover{opacity:.85}
+.share-area .sub-btn{margin-top:12px;width:100%}
+/* 結果画像: 縦長なので画面の高さに収めて、すぐ下の共有ボタンまで1画面で見えるようにする */
+.result-img{display:block;max-width:100%;max-height:58vh;width:auto;height:auto;margin:0 auto 14px;
+  border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 20px rgba(60,40,30,.12)}
+.share-lead{text-align:center;font-size:.85rem;color:var(--sub);margin:0 0 14px;line-height:1.6}
+.share-row{display:flex;gap:8px;margin-top:10px}
+.share-row .sub-btn{margin-top:0;width:auto;flex:1}
+/* 共有シートが使えない端末(主にPC)では、保存ボタンを目立たせる */
+.share-row .sub-btn.primary{flex:2;background:var(--primary);border-color:var(--primary);color:#fff;font-weight:bold;font-size:.95rem;padding:12px}
+.share-row .sub-btn.primary:hover{background:#a62a4c;color:#fff}
+#shareImgBtn{margin-bottom:0}
+#nextStep{background:var(--select-bg);border:1px solid var(--select-border);border-radius:12px;
+  padding:12px 14px;margin-top:12px;font-size:.85rem;line-height:1.6;text-align:left}
+.rank-heading{text-align:center;font-size:1.05rem;color:var(--primary);margin:30px 0 4px}
+#imgStatus{font-size:.85rem;color:var(--sub);margin:12px 0}
+.site-footer{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);text-align:left;
+  font-size:.75rem;line-height:1.7;color:var(--sub)}
+.site-footer p{margin:0 0 6px;padding-left:1em;text-indent:-1em}
+@media (max-width:420px){ .choice-container{gap:8px} .choice-title{font-size:.85rem} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
