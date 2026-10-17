@@ -89,6 +89,17 @@ button:focus-visible{outline:3px solid #8fd0ee;outline-offset:2px}
 .keys{color:var(--sub);font-size:.75rem;margin-top:12px}
 
 /* 対象曲の選択 */
+/* 絞り込み(種類 / ランダム) */
+.filter-box{text-align:left;margin:0 0 10px}
+.filter-title{font-size:.8rem;font-weight:bold;color:var(--sub);margin:0 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--border);background:#fff;color:var(--text);padding:7px 14px;border-radius:999px;
+  font-size:.85rem;font-weight:500;transition:all .15s}
+.chip small{margin-left:5px;font-size:.72rem;opacity:.7}
+.chip:hover{background:#f8f3e8}
+.chip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.chip[aria-pressed="true"]:hover{background:#a62a4c}
+.song-row span.t small{display:block;margin-top:2px;font-size:.72rem;font-weight:normal;color:var(--sub)}
 .setup-bar{display:flex;gap:8px;margin:10px 0}
 .song-list{max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:12px;text-align:left;background:#fff}
 .song-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}

@@ -40,6 +40,9 @@
 
   let items = [], itemById = new Map();
   let selected = new Set();
+  let allTypes = [];            // songs.json の type の一覧(出てきた順)
+  let filterMode = 'all';       // 'all'=すべて / 'types'=種類で絞り込み / 'custom'=手動で調整
+  let activeTypes = new Set();  // 絞り込みに使っている種類
   let session = null;   // { order:[id], choices:['l'|'r'|'t'|'s'] }
   let sorter = null;
 
@@ -150,25 +153,61 @@
     return box;
   }
 
+  /* ---------- 曲の絞り込み(種類) ---------- */
+  const baseSongs = () => activeTypes.size ? items.filter(it => it.types.some(t => activeTypes.has(t))) : items;
+  function applyFilter() {
+    selected = new Set((filterMode === 'types' ? baseSongs() : items).map(i => i.id));
+  }
+  function chip(label, count, pressed, onClick) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', pressed);
+    b.textContent = label;
+    if (count != null) { const sm = document.createElement('small'); sm.textContent = count + '曲'; b.appendChild(sm); }
+    b.onclick = onClick;
+    return b;
+  }
+  function renderFilters() {
+    // 種類で絞り込む(songs.json に type がある場合だけ表示)
+    $('#typeFilter').hidden = allTypes.length === 0;
+    if (allTypes.length) {
+      const count = t => items.filter(it => it.types.includes(t)).length;
+      $('#typeChips').replaceChildren(
+        chip('すべて', items.length, filterMode === 'all', () => {
+          filterMode = 'all'; activeTypes = new Set(); applyFilter(); renderSetup();
+        }),
+        ...allTypes.map(t => chip(t, count(t), filterMode === 'types' && activeTypes.has(t), () => {
+          if (filterMode !== 'types') activeTypes = new Set();   // 最初のタップは「その種類のみ」にする
+          activeTypes.has(t) ? activeTypes.delete(t) : activeTypes.add(t);
+          filterMode = activeTypes.size ? 'types' : 'all';
+          applyFilter(); renderSetup();
+        }))
+      );
+    }
+  }
+
   function renderSetup() {
     const saved = load();
     $('#resumeBox').hidden = !(saved && Array.isArray(saved.order) && saved.order.every(id => itemById.has(id)));
-    $('#songList').replaceChildren(...items.map(it => {
+    const listEl = $('#songList'), listTop = listEl.scrollTop;
+    listEl.replaceChildren(...items.map(it => {
       const row = document.createElement('div');
       row.className = 'song-row'; row.setAttribute('role', 'option'); row.tabIndex = 0;
       row.setAttribute('aria-checked', selected.has(it.id));
       const box = document.createElement('span'); box.className = 'box';
       const img = thumbNode(it, null, true);
       const t = document.createElement('span'); t.className = 't'; t.textContent = it.title;
+      if (it.types.length) { const sm = document.createElement('small'); sm.textContent = it.types.join('・'); t.appendChild(sm); }
       row.append(box, img, t);
-      const flip = () => { selected.has(it.id) ? selected.delete(it.id) : selected.add(it.id); renderSetup(); };
+      const flip = () => { selected.has(it.id) ? selected.delete(it.id) : selected.add(it.id); filterMode = 'custom'; renderSetup(); };
       row.onclick = flip;
       row.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } };
       return row;
     }));
     $('#selCount').textContent = `選択中 ${selected.size}曲（${selected.size >= 2 ? `バトルは約${estimate(selected.size)}回＋決勝リーグ` : '2曲以上選んでください'}）`;
     $('#startBtn').disabled = selected.size < 2;
+    renderFilters();
     show('setup-area');
+    listEl.scrollTop = listTop;
   }
 
   function renderBattle() {
@@ -483,8 +522,8 @@
   }
 
   function bind() {
-    $('#selAll').onclick = () => { items.forEach(i => selected.add(i.id)); renderSetup(); };
-    $('#selNone').onclick = () => { selected.clear(); renderSetup(); };
+    $('#selAll').onclick = () => { filterMode = 'all'; activeTypes = new Set(); applyFilter(); renderSetup(); };
+    $('#selNone').onclick = () => { selected.clear(); filterMode = 'custom'; renderSetup(); };
     $('#startBtn').onclick = start;
     $('#resumeBtn').onclick = resume;
     $('#discardBtn').onclick = () => { clear(); renderSetup(); };
@@ -545,9 +584,11 @@
         let id = d.id;
         if (id == null || seen.has(id)) id = nextId++;   // id の付け忘れ・重複があっても動くようにする
         seen.add(id);
-        return { id, title: d.title, image: d.image || '' };
+        const types = d.type == null ? [] : [].concat(d.type).map(String).filter(Boolean);
+        return { id, title: d.title, image: d.image || '', types };
       });
       items.forEach(it => itemById.set(it.id, it));
+      allTypes = [...new Set(items.flatMap(it => it.types))];
       selected = new Set(items.map(i => i.id));
       bind();
       renderSetup();

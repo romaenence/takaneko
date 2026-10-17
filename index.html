@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>高嶺のなでしこ 好き曲ソート</title>
-<link rel="stylesheet" href="./style.css?v=9">
+<link rel="stylesheet" href="./style.css?v=10">
 </head>
 <body>
 <div class="container">
@@ -12,13 +12,17 @@
 
   <!-- 1. 対象曲の選択 -->
   <div id="setup-area" hidden>
-    <p class="desc">自分だけの「好きな曲ランキング」を作成できます。<br>対象とする曲を選んでください。知らない曲は外すと精度が上がります。</p>
+    <p class="desc">自分だけの「好きな曲ランキング」を作成できます。<br>対象とする曲を選んでください。<br>対象曲を少なくすると、早く結果に辿り着けます。</p>
     <div id="resumeBox" hidden>
       <h2>前回のソートが途中です</h2>
       <div class="control-btns">
         <button class="sub-btn" id="resumeBtn">続きから再開する</button>
         <button class="sub-btn" id="discardBtn">破棄して最初から</button>
       </div>
+    </div>
+    <div class="filter-box" id="typeFilter" hidden>
+      <div class="filter-title">曲の種類で絞り込む</div>
+      <div class="chips" id="typeChips"></div>
     </div>
     <div class="setup-bar">
       <button class="sub-btn" id="selAll">全部選ぶ</button>
@@ -88,6 +92,6 @@
   </footer>
 </div>
 
-<script src="./script.js?v=1" defer></script>
+<script src="./script.js?v=3" defer></script>
 </body>
 </html>
