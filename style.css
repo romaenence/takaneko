@@ -99,6 +99,14 @@ button:focus-visible{outline:3px solid #8fd0ee;outline-offset:2px}
 .chip:hover{background:#f8f3e8}
 .chip[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
 .chip[aria-pressed="true"]:hover{background:#a62a4c}
+/* 種類チップはスマホでも1行に収める(ラベルの下に曲数を出して横幅を節約。種類が増えたら横にスクロール) */
+#typeChips{flex-wrap:nowrap;gap:6px;overflow-x:auto;padding-bottom:2px}
+#typeChips .chip{flex:1 0 auto;padding:7px 10px;line-height:1.25;text-align:center;white-space:nowrap}
+#typeChips .chip small{display:block;margin:2px 0 0}
+@media (min-width:480px){
+  #typeChips{gap:8px}
+  #typeChips .chip{flex:0 0 auto;padding:7px 16px}
+}
 .song-row span.t small{display:block;margin-top:2px;font-size:.72rem;font-weight:normal;color:var(--sub)}
 .setup-bar{display:flex;gap:8px;margin:10px 0}
 .song-list{max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:12px;text-align:left;background:#fff}
