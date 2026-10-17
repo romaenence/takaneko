@@ -86,7 +86,9 @@ button:focus-visible{outline:3px solid #8fd0ee;outline-offset:2px}
   box-shadow:0 4px 12px rgba(143,29,60,.25);transition:background .2s}
 .main-btn:hover:not(:disabled){background:#a62a4c}
 .main-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
-.keys{color:var(--sub);font-size:.75rem;margin-top:12px}
+.keys{display:none;color:var(--sub);font-size:.75rem;margin-top:12px}
+/* キーボード操作の案内は、マウスやキーボードで使う端末(PCなど)だけに出す。スマホ・タブレットでは出さない */
+@media (hover:hover) and (pointer:fine){ .keys{display:block} }
 
 /* 対象曲の選択 */
 /* 絞り込み(種類 / ランダム) */
