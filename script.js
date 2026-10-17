@@ -134,8 +134,10 @@
   // サムネイル: 画像があれば画像、無い(または読み込めない)ときは曲名の代替表示
   function fillThumb(box, song, lazy) {
     box.replaceChildren();
+    box.classList.remove('has-ph');
     const showText = () => {
       box.replaceChildren();
+      box.classList.add('has-ph');
       const ph = document.createElement('span');
       ph.className = 'ph'; ph.textContent = song.title;
       box.appendChild(ph);

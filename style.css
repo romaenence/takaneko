@@ -68,9 +68,12 @@ button:focus-visible{outline:3px solid #8fd0ee;outline-offset:2px}
   .choice-card:last-child:hover{border-color:var(--c-magenta);background:#fff7fb;transform:translateY(-3px);box-shadow:0 8px 18px rgba(228,0,127,.22)}
 }
 /* サムネイル: 画像、または曲名の代替表示(クリーム色の濃淡グラデーション) */
-.thumb{position:relative;overflow:hidden;aspect-ratio:16/9;background:#e9e2d6;container-type:inline-size;flex:none}
-.thumb img{display:block;width:100%;height:100%;object-fit:cover}
-.thumb .ph{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:0 4%;
+.thumb{position:relative;overflow:hidden;background:#e9e2d6;flex:none}
+/* 16:9 の高さは padding で確保し、中身は absolute で枠いっぱいに敷く(iPhoneのSafariでも崩れにくい書き方) */
+.thumb::before{content:"";display:block;padding-top:56.25%}
+.thumb img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.thumb.has-ph{container-type:inline-size}   /* 曲名の代替表示のときだけ、文字サイズを枠の幅に合わせる */
+.thumb .ph{position:absolute;top:0;left:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:0 4%;
   text-align:center;font-weight:bold;line-height:1.3;color:#5a4a4e;word-break:break-word;overflow:hidden;
   background:linear-gradient(135deg,#f9f4ea 0%,#eee3d0 50%,#dccbb0 100%);
   font-size:10px;font-size:max(10px,8.6cqw)}   /* 幅が十分あれば全角10文字が1行に収まる大きさ */
